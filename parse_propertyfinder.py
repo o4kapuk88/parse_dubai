@@ -12,19 +12,17 @@ def fetch_data(page):
               page.query_selector_all('ul[role=list] h2[class^=styles-module_content__title]')]
     locations = [location.text_content() for location in
                  page.query_selector_all('ul[role=list] p[class^=styles-module_content__location]')]
-    detail_rooms = page.query_selector_all('ul[role=list] p[class^=styles-module_content__details-item]')
-    rooms = [room.text_content() for room in detail_rooms[0: len(detail_rooms): 3]]
-    beths = [beth.text_content() for beth in
-             detail_rooms[1: len(detail_rooms): 3]]
-    areas = [area.text_content() for area in
-             detail_rooms[2: len(detail_rooms): 3]]
+
+    rooms = [_.inner_text() for _ in page.query_selector_all('ul[role=list] p[data-testid=property-card-spec-bedroom]')]
+    beths = [_.inner_text() for _ in page.query_selector_all('ul[role=list] p[data-testid=property-card-spec-bathroom]')]
+    areas = [_.inner_text() for _ in page.query_selector_all('ul[role=list] p[data-testid=property-card-spec-area]')]
     data = []
     for price, title, location, room, beth, area in zip(prices, titles, locations, rooms, beths, areas):
         city = location.split(', ')[-1]
         data.append([
             title.strip(),
             location.strip(),
-            city,
+            city.strip(),
             room.strip(),
             beth.strip(),
             area.strip(),
@@ -39,8 +37,8 @@ with sync_playwright() as p:
         user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36')
     page = context.new_page()
 
-    for i in range(1, 593):
-        url = f'https://www.propertyfinder.ae/en/search?l=50-71-36-86-67&c=1&fu=0&ob=mr&page={i}'
+    for i in range(1, 578):
+        url = f'https://www.propertyfinder.ae/en/search?l=50-71-36-86-67-89&c=1&fu=0&ob=mr&page={i}'
         page.goto(url, timeout=900000)
         soup = BeautifulSoup(page.content(), 'html.parser')
         clean_data = fetch_data(page)
